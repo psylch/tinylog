@@ -1,0 +1,2 @@
+{"type": "user", "timestamp": "2026-03-02T20:36:29.180664+00:00", "message": {"role": "user", "content": "What is Python?"}}
+{"type": "assistant", "timestamp": "2026-03-02T20:36:29.180664+00:00", "message": {"role": "assistant", "model": "claude-sonnet-4-20250514", "content": [{"type": "text", "text": "Python is a programming language."}], "usage": {"input_tokens": 10, "output_tokens": 20}}}

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hmac
+
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import JSONResponse, Response
@@ -28,7 +30,7 @@ class AdminKeyMiddleware(BaseHTTPMiddleware):
 
         # Check key
         provided = request.headers.get("X-Admin-Key", "")
-        if provided != self.admin_key:
+        if not hmac.compare_digest(provided, self.admin_key):
             return JSONResponse(status_code=401, content={"detail": "Invalid or missing admin key"})
 
         return await call_next(request)

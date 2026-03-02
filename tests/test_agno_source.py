@@ -1,24 +1,22 @@
-"""Tests for AgnoSource against the real agno_sessions.db."""
+"""Tests for AgnoSource against fixture data."""
+from pathlib import Path
 
-import os
 import pytest
 
 from tinylog.sources.agno import AgnoSource
 
-DB_PATH = "/Users/lichihao/Workspaces/projectWorkspace/huihifi_ai/ai-tuning/aituning-be/agno_sessions.db"
+FIXTURES = Path(__file__).parent / "fixtures"
 
 
 @pytest.fixture
 def source():
-    if not os.path.exists(DB_PATH):
-        pytest.skip("agno_sessions.db not found")
-    return AgnoSource(DB_PATH)
+    return AgnoSource(str(FIXTURES / "agno_sessions.db"))
 
 
 class TestListSessions:
     def test_returns_items_and_total(self, source):
         items, total = source.list_sessions(page=1, page_size=10)
-        assert total == 113
+        assert total == 2
         assert len(items) <= 10
         assert len(items) > 0
 
@@ -33,10 +31,10 @@ class TestListSessions:
         assert isinstance(s.total_tokens, int)
 
     def test_pagination(self, source):
-        items1, total = source.list_sessions(page=1, page_size=5)
-        items2, _ = source.list_sessions(page=2, page_size=5)
-        assert len(items1) == 5
-        assert len(items2) == 5
+        items1, total = source.list_sessions(page=1, page_size=1)
+        items2, _ = source.list_sessions(page=2, page_size=1)
+        assert len(items1) == 1
+        assert len(items2) == 1
         assert items1[0].session_id != items2[0].session_id
 
     def test_sort_created_at_desc(self, source):
@@ -45,8 +43,8 @@ class TestListSessions:
             assert items[i].created_at >= items[i + 1].created_at
 
     def test_keyword_search(self, source):
-        items, total = source.list_sessions(keyword="调音")
-        assert total > 0 or total == 0  # may or may not match, but should not error
+        items, total = source.list_sessions(keyword="Hello")
+        assert total > 0 or total == 0  # should not error
 
 
 class TestGetSession:
@@ -71,7 +69,7 @@ class TestGetSession:
 
 class TestDailyMetrics:
     def test_returns_daily_data(self, source):
-        metrics = source.get_daily_metrics("2025-01-01", "2026-12-31")
+        metrics = source.get_daily_metrics("2020-01-01", "2030-12-31")
         assert len(metrics) > 0
         m = metrics[0]
         assert m.date
@@ -81,7 +79,7 @@ class TestDailyMetrics:
 
 class TestToolStats:
     def test_returns_tool_distribution(self, source):
-        stats = source.get_tool_stats("2025-01-01", "2026-12-31")
+        stats = source.get_tool_stats("2020-01-01", "2030-12-31")
         assert "summary" in stats
         assert "daily" in stats
         assert isinstance(stats["summary"], dict)

@@ -136,7 +136,7 @@ export default function SessionsPage() {
               <Th>Session</Th>
               <Th>First Query</Th>
               <Th align="right">Time</Th>
-              <Th align="right">Tokens</Th>
+              <Th align="right" className="hide-mobile">Tokens</Th>
               <Th align="right">Status</Th>
             </tr>
           </thead>
@@ -169,7 +169,7 @@ export default function SessionsPage() {
                   <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }} className="text-xs text-muted">
                     {relativeTime(s.created_at)}
                   </td>
-                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }} className="font-mono text-xs text-secondary">
+                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }} className="font-mono text-xs text-secondary hide-mobile">
                     {formatTokens(s.total_tokens)}
                   </td>
                   <td style={{ textAlign: 'right' }}>
@@ -222,9 +222,9 @@ export default function SessionsPage() {
   );
 }
 
-function Th({ children, align = 'left' }: { children: React.ReactNode; align?: 'left' | 'right' }) {
+function Th({ children, align = 'left', className }: { children: React.ReactNode; align?: 'left' | 'right'; className?: string }) {
   return (
-    <th style={{ textAlign: align }}>
+    <th style={{ textAlign: align }} className={className}>
       {children}
     </th>
   );

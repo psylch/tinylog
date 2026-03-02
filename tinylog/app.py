@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .api.auth import AdminKeyMiddleware
@@ -13,22 +15,36 @@ from .api.statistics import router as statistics_router
 from .api.files import router as files_router
 from .config import Config
 from .db import TinyLogDB
-from .sources.agno import AgnoSource
+from .sources import get_source
+from .sources.detect import detect_source_type
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
 
 def create_app(config: Config) -> FastAPI:
     app = FastAPI(title="TinyLog", version="0.1.0")
 
+    # CORS middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     # Auth middleware
     app.add_middleware(AdminKeyMiddleware, admin_key=config.admin_key)
 
-    # Data source
-    if config.source_type == "agno":
-        if not config.db_path:
-            raise ValueError("db_path is required for agno source type")
-        source = AgnoSource(config.db_path)
-    else:
-        raise ValueError(f"Unknown source type: {config.source_type}")
+    # Data source — auto-detect if needed
+    if not config.db_path:
+        raise ValueError("db_path is required")
+
+    source_type = config.source_type
+    if source_type == "auto" or not source_type:
+        source_type = detect_source_type(config.db_path)
+
+    source_cls = get_source(source_type)
+    source = source_cls(config.db_path)
 
     app.state.source = source
     app.state.config = config

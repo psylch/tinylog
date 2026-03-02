@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 if sys.version_info >= (3, 11):
@@ -18,7 +18,7 @@ class Config:
     host: str = "0.0.0.0"
     port: int = 7890
     admin_key: str = ""
-    source_type: str = "agno"
+    source_type: str = "auto"
     db_path: str = ""
     data_dir: str = "./tinylog_data"
     theme: str = "dark"
@@ -28,6 +28,7 @@ class Config:
 def load_config(
     *,
     db_path: str | None = None,
+    source_type: str | None = None,
     port: int | None = None,
     host: str | None = None,
     admin_key: str | None = None,
@@ -73,6 +74,8 @@ def load_config(
         cfg.host = host
     if admin_key is not None:
         cfg.admin_key = admin_key
+    if source_type is not None:
+        cfg.source_type = source_type
     if data_dir is not None:
         cfg.data_dir = data_dir
 

@@ -1,7 +1,6 @@
 """Tests for API endpoints using httpx TestClient."""
-
-import os
 import tempfile
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -9,13 +8,12 @@ from fastapi.testclient import TestClient
 from tinylog.config import Config
 from tinylog.app import create_app
 
-DB_PATH = "/Users/lichihao/Workspaces/projectWorkspace/huihifi_ai/ai-tuning/aituning-be/agno_sessions.db"
+FIXTURES = Path(__file__).parent / "fixtures"
+DB_PATH = str(FIXTURES / "agno_sessions.db")
 
 
 @pytest.fixture
 def client():
-    if not os.path.exists(DB_PATH):
-        pytest.skip("agno_sessions.db not found")
     with tempfile.TemporaryDirectory() as tmpdir:
         config = Config(db_path=DB_PATH, data_dir=tmpdir)
         app = create_app(config)
@@ -43,7 +41,7 @@ class TestSessions:
         r = client.get("/api/sessions")
         assert r.status_code == 200
         data = r.json()
-        assert data["total"] == 113
+        assert data["total"] == 2
         assert len(data["items"]) <= 20
         item = data["items"][0]
         assert "session_id" in item
@@ -51,14 +49,13 @@ class TestSessions:
         assert "total_tokens" in item
 
     def test_list_sessions_pagination(self, client):
-        r = client.get("/api/sessions?page=1&page_size=5")
+        r = client.get("/api/sessions?page=1&page_size=1")
         assert r.status_code == 200
         data = r.json()
-        assert len(data["items"]) == 5
+        assert len(data["items"]) == 1
         assert data["page"] == 1
 
     def test_get_session_detail(self, client):
-        # Get first session ID
         r = client.get("/api/sessions?page_size=1")
         sid = r.json()["items"][0]["session_id"]
 
@@ -84,13 +81,13 @@ class TestStatistics:
         assert data["current"]["sessions"] > 0
 
     def test_daily(self, client):
-        r = client.get("/api/statistics/daily?date_from=2025-01-01&date_to=2026-12-31")
+        r = client.get("/api/statistics/daily?date_from=2020-01-01&date_to=2030-12-31")
         assert r.status_code == 200
         data = r.json()
         assert len(data["data"]) > 0
 
     def test_tools(self, client):
-        r = client.get("/api/statistics/tools?date_from=2025-01-01&date_to=2026-12-31")
+        r = client.get("/api/statistics/tools?date_from=2020-01-01&date_to=2030-12-31")
         assert r.status_code == 200
         data = r.json()
         assert "summary" in data
@@ -98,8 +95,6 @@ class TestStatistics:
 
 class TestAuth:
     def test_auth_required(self):
-        if not os.path.exists(DB_PATH):
-            pytest.skip("agno_sessions.db not found")
         with tempfile.TemporaryDirectory() as tmpdir:
             config = Config(db_path=DB_PATH, data_dir=tmpdir, admin_key="test-secret")
             app = create_app(config)

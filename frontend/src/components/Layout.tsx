@@ -35,7 +35,7 @@ export default function Layout({ needsAuth }: { needsAuth: boolean }) {
               </div>
               TinyLog
             </NavLink>
-            <nav className="flex items-center gap-1" style={{ display: 'flex' }}>
+            <nav className="desktop-nav flex items-center gap-1">
               {navLinks.map((link) => (
                 <NavLink
                   key={link.to}
@@ -87,8 +87,8 @@ export default function Layout({ needsAuth }: { needsAuth: boolean }) {
             )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="btn btn-ghost"
-              style={{ padding: '0.4rem', display: 'none' /* Will show via global css if needed, but for simplicity we rely on native flex */ }}
+              className="btn btn-ghost mobile-menu-btn"
+              style={{ padding: '0.4rem' }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 {mobileMenuOpen ? (
@@ -107,21 +107,19 @@ export default function Layout({ needsAuth }: { needsAuth: boolean }) {
             </button>
           </div>
         </div>
-        {mobileMenuOpen && (
-          <nav style={{ padding: '0 1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                end={link.to === '/'}
-                onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
-        )}
+        <nav className={`mobile-nav${mobileMenuOpen ? ' open' : ''}`}>
+          {navLinks.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.to === '/'}
+              onClick={() => setMobileMenuOpen(false)}
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            >
+              {link.label}
+            </NavLink>
+          ))}
+        </nav>
       </header>
       <main className="main-content">
         <Outlet />

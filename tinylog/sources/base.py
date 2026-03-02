@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass
@@ -35,6 +35,7 @@ class Message:
     tool_calls: list[dict] | None = None
     tool_name: str | None = None
     tool_call_id: str | None = None
+    images: list[str] | None = None
 
 
 @dataclass
