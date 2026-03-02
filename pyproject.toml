@@ -1,0 +1,35 @@
+[project]
+name = "tinylog-llm"
+version = "0.1.0"
+description = "Lightweight LLM conversation viewer and analytics dashboard"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+keywords = ["llm", "dashboard", "conversation", "analytics", "agno"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: FastAPI",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.30.0",
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "httpx", "ruff"]
+
+[project.scripts]
+tinylog = "tinylog.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["tinylog"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
