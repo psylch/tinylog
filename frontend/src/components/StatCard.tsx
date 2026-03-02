@@ -8,13 +8,10 @@ interface StatCardProps {
 export default function StatCard({ label, value, trend, loading }: StatCardProps) {
   if (loading) {
     return (
-      <div
-        className="rounded-lg border p-4"
-        style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}
-      >
-        <div className="skeleton mb-2 h-3 w-16" />
-        <div className="skeleton mb-1 h-7 w-20" />
-        <div className="skeleton h-3 w-12" />
+      <div className="card" style={{ padding: '1.25rem' }}>
+        <div className="skeleton" style={{ height: '0.75rem', width: '4rem', marginBottom: '0.75rem' }} />
+        <div className="skeleton" style={{ height: '1.75rem', width: '5rem', marginBottom: '0.5rem' }} />
+        <div className="skeleton" style={{ height: '0.75rem', width: '3rem' }} />
       </div>
     );
   }
@@ -29,24 +26,19 @@ export default function StatCard({ label, value, trend, loading }: StatCardProps
   const trendIcon = !hasTrend
     ? '~'
     : trend! > 0
-      ? String.fromCharCode(8593) // up arrow
-      : String.fromCharCode(8595); // down arrow
+      ? String.fromCharCode(8593)
+      : String.fromCharCode(8595);
 
   return (
-    <div
-      className="rounded-lg border p-4 transition-colors"
-      style={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)' }}
-      onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--accent)')}
-      onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
-    >
-      <p className="text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>
+    <div className="card" style={{ padding: '1.25rem' }}>
+      <p className="text-secondary" style={{ fontSize: '0.6875rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         {label}
       </p>
-      <p className="mt-1 text-2xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+      <p className="text-primary" style={{ marginTop: '0.5rem', fontSize: '1.5rem', fontWeight: 600, letterSpacing: '-0.02em' }}>
         {value}
       </p>
       {trend != null && (
-        <p className="mt-1 text-xs font-medium" style={{ color: trendColor }}>
+        <p style={{ marginTop: '0.375rem', fontSize: '0.75rem', fontWeight: 500, color: trendColor }}>
           {trendIcon} {Math.abs(trend).toFixed(1)}%
         </p>
       )}

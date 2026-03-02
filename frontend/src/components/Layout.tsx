@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import { clearAdminKey } from '../services/api';
@@ -10,38 +11,37 @@ const navLinks = [
 
 export default function Layout({ needsAuth }: { needsAuth: boolean }) {
   const { theme, toggleTheme } = useTheme();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-base)' }}>
-      <header
-        className="sticky top-0 z-40 border-b"
-        style={{
-          backgroundColor: 'var(--bg-surface)',
-          borderColor: 'var(--border)',
-        }}
-      >
-        <div className="mx-auto flex h-14 max-w-screen-xl items-center justify-between px-4 sm:px-6">
-          <div className="flex items-center gap-8">
-            <NavLink to="/" className="flex items-center gap-2 text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-              </svg>
+    <div className="app-container">
+      <header className="header-glass">
+        <div className="header-content">
+          <div className="flex items-center gap-6">
+            <NavLink to="/" className="flex items-center gap-2 font-semibold text-sm" style={{ marginRight: '1rem', letterSpacing: '-0.01em' }}>
+              <div
+                className="flex justify-center items-center"
+                style={{
+                  width: '28px', height: '28px',
+                  borderRadius: '8px',
+                  backgroundColor: 'var(--accent)',
+                  boxShadow: '0 2px 8px var(--accent-muted)'
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+              </div>
               TinyLog
             </NavLink>
-            <nav className="hidden sm:flex items-center gap-1">
+            <nav className="flex items-center gap-1" style={{ display: 'flex' }}>
               {navLinks.map((link) => (
                 <NavLink
                   key={link.to}
                   to={link.to}
                   end={link.to === '/'}
-                  className="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
-                  style={({ isActive }) => ({
-                    color: isActive ? 'var(--accent)' : 'var(--text-secondary)',
-                    backgroundColor: isActive ? 'var(--accent-muted)' : 'transparent',
-                  })}
+                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                 >
                   {link.label}
                 </NavLink>
@@ -51,10 +51,8 @@ export default function Layout({ needsAuth }: { needsAuth: boolean }) {
           <div className="flex items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="rounded-md p-2 transition-colors"
-              style={{ color: 'var(--text-secondary)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              className="btn btn-ghost"
+              style={{ padding: '0.4rem', borderRadius: '50%' }}
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
               {theme === 'dark' ? (
@@ -81,18 +79,51 @@ export default function Layout({ needsAuth }: { needsAuth: boolean }) {
                   clearAdminKey();
                   window.location.reload();
                 }}
-                className="rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
-                style={{ color: 'var(--text-muted)', border: '1px solid var(--border)' }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--danger)')}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border)')}
+                className="btn btn-secondary text-xs"
+                style={{ padding: '0.25rem 0.75rem', borderRadius: '6px' }}
               >
                 Logout
               </button>
             )}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="btn btn-ghost"
+              style={{ padding: '0.4rem', display: 'none' /* Will show via global css if needed, but for simplicity we rely on native flex */ }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {mobileMenuOpen ? (
+                  <>
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </>
+                ) : (
+                  <>
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
+                  </>
+                )}
+              </svg>
+            </button>
           </div>
         </div>
+        {mobileMenuOpen && (
+          <nav style={{ padding: '0 1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.to === '/'}
+                onClick={() => setMobileMenuOpen(false)}
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+        )}
       </header>
-      <main className="mx-auto max-w-screen-xl px-4 py-6 sm:px-6">
+      <main className="main-content">
         <Outlet />
       </main>
     </div>

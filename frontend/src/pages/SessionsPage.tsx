@@ -11,6 +11,7 @@ export default function SessionsPage() {
 
   const [data, setData] = useState<PaginatedResponse<SessionSummary> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [keyword, setKeyword] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -21,6 +22,7 @@ export default function SessionsPage() {
 
   const fetchSessions = useCallback(() => {
     setLoading(true);
+    setError(null);
     getSessions({
       page,
       page_size: pageSize,
@@ -29,7 +31,10 @@ export default function SessionsPage() {
       date_to: dateTo || undefined,
     })
       .then(setData)
-      .catch(() => setData(null))
+      .catch((err) => {
+        setData(null);
+        setError(err instanceof Error ? err.message : 'Failed to load sessions');
+      })
       .finally(() => setLoading(false));
   }, [page, keyword, dateFrom, dateTo]);
 
@@ -55,15 +60,35 @@ export default function SessionsPage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
+      <h1 className="text-xl font-semibold text-primary" style={{ marginBottom: '1.25rem' }}>
         Sessions
       </h1>
 
+      {/* Error */}
+      {error && (
+        <div className="notice" style={{ marginBottom: '1.25rem' }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span className="flex-1">{error}</span>
+          <button
+            onClick={() => { setError(null); fetchSessions(); }}
+            style={{ fontSize: '0.75rem', fontWeight: 500, textDecoration: 'underline', color: 'inherit', background: 'none', border: 'none', cursor: 'pointer', opacity: 0.8 }}
+            onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+            onMouseLeave={e => e.currentTarget.style.opacity = '0.8'}
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Filters */}
-      <div className="mb-4 flex flex-wrap gap-3">
-        <div className="relative flex-1" style={{ minWidth: 200 }}>
+      <div className="flex gap-3 flex-wrap" style={{ marginBottom: '1.25rem' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2"
+            style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }}
             width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
           >
             <circle cx="11" cy="11" r="8" />
@@ -77,12 +102,8 @@ export default function SessionsPage() {
               setKeyword(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-md border py-2 pl-9 pr-3 text-sm"
-            style={{
-              backgroundColor: 'var(--bg-surface)',
-              borderColor: 'var(--border)',
-              color: 'var(--text-primary)',
-            }}
+            className="input-field"
+            style={{ paddingLeft: '2.25rem', boxShadow: 'none' }}
           />
         </div>
         <input
@@ -92,13 +113,8 @@ export default function SessionsPage() {
             setDateFrom(e.target.value);
             setPage(1);
           }}
-          className="rounded-md border px-3 py-2 text-sm"
-          style={{
-            backgroundColor: 'var(--bg-surface)',
-            borderColor: 'var(--border)',
-            color: 'var(--text-primary)',
-            colorScheme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
-          }}
+          className="input-field"
+          style={{ width: 'auto', boxShadow: 'none' }}
         />
         <input
           type="date"
@@ -107,24 +123,16 @@ export default function SessionsPage() {
             setDateTo(e.target.value);
             setPage(1);
           }}
-          className="rounded-md border px-3 py-2 text-sm"
-          style={{
-            backgroundColor: 'var(--bg-surface)',
-            borderColor: 'var(--border)',
-            color: 'var(--text-primary)',
-            colorScheme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
-          }}
+          className="input-field"
+          style={{ width: 'auto', boxShadow: 'none' }}
         />
       </div>
 
       {/* Table */}
-      <div
-        className="overflow-hidden rounded-lg border"
-        style={{ borderColor: 'var(--border)' }}
-      >
-        <table className="w-full text-sm">
+      <div className="table-container">
+        <table className="premium-table">
           <thead>
-            <tr style={{ backgroundColor: 'var(--bg-elevated)' }}>
+            <tr>
               <Th>Session</Th>
               <Th>First Query</Th>
               <Th align="right">Time</Th>
@@ -137,8 +145,8 @@ export default function SessionsPage() {
               Array.from({ length: 8 }).map((_, i) => (
                 <tr key={i}>
                   {Array.from({ length: 5 }).map((_, j) => (
-                    <td key={j} className="px-4 py-3">
-                      <div className="skeleton h-4 w-full" />
+                    <td key={j}>
+                      <div className="skeleton" style={{ height: '1rem', width: '100%', borderRadius: '4px' }} />
                     </td>
                   ))}
                 </tr>
@@ -147,35 +155,37 @@ export default function SessionsPage() {
               data.items.map((s) => (
                 <tr
                   key={s.session_id}
-                  className="cursor-pointer border-t transition-colors"
-                  style={{ borderColor: 'var(--border-light)' }}
+                  style={{ cursor: 'pointer' }}
                   onClick={() => openSession(s.session_id)}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
-                  <td className="px-4 py-3">
-                    <span className="font-mono text-xs" style={{ color: 'var(--accent)' }}>
+                  <td>
+                    <span className="font-mono text-xs font-medium" style={{ color: 'var(--accent)' }}>
                       {shortSessionId(s.session_id)}
                     </span>
                   </td>
-                  <td className="max-w-xs truncate px-4 py-3" style={{ color: 'var(--text-primary)' }}>
+                  <td style={{ maxWidth: '20rem' }} className="truncate text-primary">
                     {s.first_query || '-'}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-right text-xs" style={{ color: 'var(--text-muted)' }}>
+                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }} className="text-xs text-muted">
                     {relativeTime(s.created_at)}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-right font-mono text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }} className="font-mono text-xs text-secondary">
                     {formatTokens(s.total_tokens)}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td style={{ textAlign: 'right' }}>
                     <StatusBadge status={s.status} />
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="px-4 py-12 text-center text-sm" style={{ color: 'var(--text-muted)' }}>
-                  No sessions found
+                <td colSpan={5} style={{ padding: '4rem 1rem', textAlign: 'center' }}>
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.3 }}>
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    <p className="text-sm text-muted">No sessions found</p>
+                  </div>
                 </td>
               </tr>
             )}
@@ -185,23 +195,21 @@ export default function SessionsPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-3" style={{ marginTop: '1.25rem' }}>
           <button
             disabled={page <= 1}
             onClick={() => setPage((p) => p - 1)}
-            className="rounded-md px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-30"
-            style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+            className="btn btn-secondary text-xs"
           >
             Prev
           </button>
-          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          <span className="font-mono text-xs text-muted">
             {page} / {totalPages}
           </span>
           <button
             disabled={page >= totalPages}
             onClick={() => setPage((p) => p + 1)}
-            className="rounded-md px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-30"
-            style={{ color: 'var(--text-secondary)', border: '1px solid var(--border)' }}
+            className="btn btn-secondary text-xs"
           >
             Next
           </button>
@@ -216,24 +224,35 @@ export default function SessionsPage() {
 
 function Th({ children, align = 'left' }: { children: React.ReactNode; align?: 'left' | 'right' }) {
   return (
-    <th
-      className={`px-4 py-3 text-xs font-medium uppercase tracking-wider ${align === 'right' ? 'text-right' : 'text-left'}`}
-      style={{ color: 'var(--text-muted)' }}
-    >
+    <th style={{ textAlign: align }}>
       {children}
     </th>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const isError = status.toLowerCase().includes('error');
+  const lower = status.toLowerCase();
+  const isError = lower.includes('error') || lower.includes('fail');
+  const isPaused = lower.includes('pause') || lower.includes('pending');
+
+  let bgColor: string;
+  let textColor: string;
+
+  if (isError) {
+    bgColor = 'var(--danger-muted)';
+    textColor = 'var(--danger)';
+  } else if (isPaused) {
+    bgColor = 'var(--warning-muted)';
+    textColor = 'var(--warning)';
+  } else {
+    bgColor = 'var(--success-muted)';
+    textColor = 'var(--success)';
+  }
+
   return (
     <span
-      className="inline-block rounded px-1.5 py-0.5 text-[10px] font-medium"
-      style={{
-        backgroundColor: isError ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)',
-        color: isError ? 'var(--danger)' : 'var(--success)',
-      }}
+      className="badge"
+      style={{ backgroundColor: bgColor, color: textColor }}
     >
       {status}
     </span>

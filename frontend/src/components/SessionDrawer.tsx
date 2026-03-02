@@ -28,27 +28,12 @@ export default function SessionDrawer({ sessionId, onClose }: SessionDrawerProps
 
   return (
     <>
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 z-50 bg-black/50 transition-opacity"
-        onClick={onClose}
-      />
-      {/* Drawer */}
-      <div
-        className="fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l sm:w-3/5"
-        style={{
-          backgroundColor: 'var(--bg-base)',
-          borderColor: 'var(--border)',
-        }}
-      >
-        {/* Header */}
-        <div
-          className="flex items-center justify-between border-b px-5 py-4"
-          style={{ borderColor: 'var(--border)' }}
-        >
-          <div className="min-w-0 flex-1">
+      <div className="drawer-overlay" onClick={onClose} />
+      <div className="drawer-panel">
+        <div className="drawer-header">
+          <div style={{ flex: 1, minWidth: 0 }}>
             {loading ? (
-              <div className="skeleton h-5 w-48" />
+              <div className="skeleton" style={{ height: '1.25rem', width: '12rem' }} />
             ) : session ? (
               <>
                 <div className="flex items-center gap-2">
@@ -56,15 +41,12 @@ export default function SessionDrawer({ sessionId, onClose }: SessionDrawerProps
                     {session.session_id.slice(0, 12)}...
                   </span>
                   {session.model && (
-                    <span
-                      className="rounded px-1.5 py-0.5 text-xs"
-                      style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
-                    >
+                    <span className="badge" style={{ backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
                       {session.model}
                     </span>
                   )}
                 </div>
-                <div className="mt-1 flex gap-4 text-xs" style={{ color: 'var(--text-muted)' }}>
+                <div style={{ marginTop: '0.25rem', display: 'flex', gap: '1rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                   <span>{formatTokens(session.metrics.total_tokens)} tokens</span>
                   {session.metrics.duration != null && (
                     <span>{formatDuration(session.metrics.duration)}</span>
@@ -73,15 +55,13 @@ export default function SessionDrawer({ sessionId, onClose }: SessionDrawerProps
                 </div>
               </>
             ) : (
-              <span style={{ color: 'var(--text-muted)' }}>Session not found</span>
+              <span className="text-muted">Session not found</span>
             )}
           </div>
           <button
             onClick={onClose}
-            className="ml-4 rounded-md p-1.5 transition-colors"
-            style={{ color: 'var(--text-muted)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+            className="btn btn-ghost"
+            style={{ padding: '0.375rem', borderRadius: '6px', marginLeft: '1rem' }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -90,12 +70,11 @@ export default function SessionDrawer({ sessionId, onClose }: SessionDrawerProps
           </button>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+        <div className="drawer-content">
           {loading ? (
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="skeleton h-16 w-full" />
+                <div key={i} className="skeleton" style={{ height: '4rem', width: '100%' }} />
               ))}
             </div>
           ) : session ? (
@@ -108,7 +87,6 @@ export default function SessionDrawer({ sessionId, onClose }: SessionDrawerProps
 }
 
 function MessageList({ messages, files }: { messages: Message[]; files: SessionDetail['files'] }) {
-  // Group tool messages with their preceding assistant message's tool_calls
   const toolResultMap = new Map<string, Message>();
   for (const msg of messages) {
     if (msg.role === 'tool' && msg.tool_call_id) {
@@ -117,7 +95,7 @@ function MessageList({ messages, files }: { messages: Message[]; files: SessionD
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       {messages
         .filter((m) => m.role !== 'tool')
         .map((msg) => (
@@ -144,20 +122,12 @@ function MessageBubble({
   const isUser = message.role === 'user';
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-[85%] ${isUser ? '' : 'w-full'}`}>
-        <div
-          className="rounded-lg px-4 py-3 text-sm leading-relaxed"
-          style={{
-            backgroundColor: isUser ? 'var(--accent-muted)' : 'var(--bg-surface)',
-            color: 'var(--text-primary)',
-            border: isUser ? 'none' : '1px solid var(--border)',
-          }}
-        >
-          <div className="whitespace-pre-wrap break-words">{message.content}</div>
-          {/* Inline images */}
+    <div className="flex" style={{ justifyContent: isUser ? 'flex-end' : 'flex-start' }}>
+      <div style={{ width: isUser ? 'auto' : '100%', maxWidth: '100%' }}>
+        <div className={`msg-bubble ${isUser ? 'msg-user' : 'msg-ai'}`}>
+          <div style={{ whiteSpace: 'pre-wrap' }}>{message.content}</div>
           {message.images && message.images.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2" style={{ marginTop: '0.5rem' }}>
               {message.images.map((fileId) => {
                 const file = files.find((f) => f.id === fileId);
                 return file ? (
@@ -165,8 +135,7 @@ function MessageBubble({
                     key={fileId}
                     src={file.url}
                     alt={file.filename}
-                    className="max-h-40 rounded border cursor-pointer"
-                    style={{ borderColor: 'var(--border)' }}
+                    style={{ maxHeight: '10rem', borderRadius: '4px', border: '1px solid var(--border)', cursor: 'pointer' }}
                     onClick={() => window.open(file.url, '_blank')}
                   />
                 ) : null;
@@ -174,9 +143,8 @@ function MessageBubble({
             </div>
           )}
         </div>
-        {/* Tool calls below assistant bubble */}
         {message.tool_calls && message.tool_calls.length > 0 && (
-          <div className="mt-2 space-y-2">
+          <div className="flex flex-col gap-2" style={{ marginTop: '0.5rem' }}>
             {message.tool_calls.map((tc) => (
               <ToolCallCard key={tc.id} toolCall={tc} toolResult={toolResultMap.get(tc.id)} />
             ))}
@@ -194,16 +162,11 @@ function ToolCallCard({ toolCall, toolResult }: { toolCall: ToolCall; toolResult
   const isError = resultContent?.includes('"error"') || resultContent?.includes('Error');
 
   return (
-    <div
-      className="rounded-md border text-xs"
-      style={{ borderColor: 'var(--border)', backgroundColor: 'var(--bg-elevated)' }}
-    >
+    <div className={`tool-card ${expanded ? 'expanded' : ''}`}>
       <button
-        className="flex w-full items-center gap-2 px-3 py-2 text-left transition-colors"
-        style={{ color: 'var(--text-secondary)' }}
+        className="tool-card-header text-left"
+        style={{ width: '100%', color: 'var(--text-secondary)' }}
         onClick={() => setExpanded(!expanded)}
-        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--bg-hover)')}
-        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
@@ -212,9 +175,10 @@ function ToolCallCard({ toolCall, toolResult }: { toolCall: ToolCall; toolResult
           {toolCall.name}
         </span>
         <span
-          className="ml-auto rounded px-1.5 py-0.5 text-[10px] font-medium"
+          className="badge"
           style={{
-            backgroundColor: isError ? 'rgba(239,68,68,0.15)' : 'rgba(34,197,94,0.15)',
+            marginLeft: 'auto',
+            backgroundColor: isError ? 'var(--danger-muted)' : 'var(--success-muted)',
             color: isError ? 'var(--danger)' : 'var(--success)',
           }}
         >
@@ -229,29 +193,29 @@ function ToolCallCard({ toolCall, toolResult }: { toolCall: ToolCall; toolResult
           strokeWidth="2"
           style={{
             transform: expanded ? 'rotate(180deg)' : 'rotate(0)',
-            transition: 'transform 0.15s',
+            transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
         >
           <polyline points="6 9 12 15 18 9" />
         </svg>
       </button>
       {expanded && (
-        <div className="border-t px-3 py-2" style={{ borderColor: 'var(--border)' }}>
-          <div className="mb-2">
-            <span className="font-medium" style={{ color: 'var(--text-muted)' }}>Args</span>
+        <div className="tool-card-body">
+          <div style={{ marginBottom: '0.5rem' }}>
+            <span style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Args</span>
             <pre
-              className="font-mono mt-1 overflow-x-auto rounded p-2 text-[11px] leading-relaxed"
-              style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-secondary)' }}
+              className="font-mono"
+              style={{ marginTop: '0.25rem', overflowX: 'auto', borderRadius: '4px', padding: '0.5rem', backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border)', fontSize: '0.6875rem', lineHeight: 1.6, color: 'var(--text-secondary)' }}
             >
               {JSON.stringify(toolCall.args, null, 2)}
             </pre>
           </div>
           {resultContent && (
             <div>
-              <span className="font-medium" style={{ color: 'var(--text-muted)' }}>Result</span>
+              <span style={{ fontWeight: 500, color: 'var(--text-muted)' }}>Result</span>
               <pre
-                className="font-mono mt-1 max-h-48 overflow-auto rounded p-2 text-[11px] leading-relaxed"
-                style={{ backgroundColor: 'var(--bg-base)', color: 'var(--text-secondary)' }}
+                className="font-mono"
+                style={{ marginTop: '0.25rem', maxHeight: '12rem', overflow: 'auto', borderRadius: '4px', padding: '0.5rem', backgroundColor: 'var(--bg-elevated)', border: '1px solid var(--border)', fontSize: '0.6875rem', lineHeight: 1.6, color: 'var(--text-secondary)' }}
               >
                 {formatJson(resultContent)}
               </pre>

@@ -43,11 +43,8 @@ export default function App() {
   // Loading state
   if (needsAuth === null) {
     return (
-      <div
-        className="flex min-h-screen items-center justify-center"
-        style={{ backgroundColor: 'var(--bg-base)' }}
-      >
-        <div className="skeleton h-8 w-32 rounded-md" />
+      <div className="app-container flex items-center justify-center">
+        <div className="skeleton" style={{ height: '32px', width: '128px' }} />
       </div>
     );
   }
