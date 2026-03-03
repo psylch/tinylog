@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from importlib.metadata import version as pkg_version
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -22,7 +23,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname
 
 
 def create_app(config: Config) -> FastAPI:
-    app = FastAPI(title="TinyLog", version="0.1.0")
+    _version = pkg_version("tinylog-llm")
+    app = FastAPI(title="TinyLog", version=_version)
 
     # CORS middleware
     app.add_middleware(
@@ -60,7 +62,7 @@ def create_app(config: Config) -> FastAPI:
 
     @app.get("/api/health")
     async def health():
-        return {"status": "ok", "version": "0.1.0"}
+        return {"status": "ok", "version": _version}
 
     @app.get("/api/config")
     async def frontend_config():

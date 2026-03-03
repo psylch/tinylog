@@ -43,8 +43,9 @@ class TestListSessions:
             assert items[i].created_at >= items[i + 1].created_at
 
     def test_keyword_search(self, source):
-        items, total = source.list_sessions(keyword="Hello")
-        assert total > 0 or total == 0  # should not error
+        items, total = source.list_sessions(keyword="session 1")
+        assert total == 1
+        assert items[0].session_id == "test-session-1"
 
 
 class TestGetSession:

@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://www.python.org/)
 [![PyPI version](https://img.shields.io/pypi/v/tinylog-llm.svg)](https://pypi.org/project/tinylog-llm/)
+[![CI](https://github.com/psylch/tinylog/actions/workflows/ci.yml/badge.svg)](https://github.com/psylch/tinylog/actions/workflows/ci.yml)
 
 **One command to see how your AI app is being used.**
 
@@ -60,6 +61,8 @@ tinylog serve --db ./conversations.json --source-type json
 
 # Open http://localhost:7890
 ```
+
+API documentation is available at `http://localhost:7890/docs` (Swagger UI) when the server is running.
 
 ## Supported Data Sources
 

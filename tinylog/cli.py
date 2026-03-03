@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import argparse
 import sys
+from importlib.metadata import version as pkg_version
 
 
 def main():
+    _version = pkg_version("tinylog-llm")
     parser = argparse.ArgumentParser(prog="tinylog", description="TinyLog — LLM conversation viewer")
-    parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {_version}")
     subparsers = parser.add_subparsers(dest="command")
 
     # serve command
