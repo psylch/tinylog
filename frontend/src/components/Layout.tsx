@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useTheme } from '../hooks/useTheme';
 import { clearAdminKey } from '../services/api';
@@ -11,44 +11,60 @@ const navLinks = [
 
 export default function Layout({ needsAuth }: { needsAuth: boolean }) {
   const { theme, toggleTheme } = useTheme();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const cards = document.querySelectorAll('.card');
+      cards.forEach((card) => {
+        const rect = (card as HTMLElement).getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        (card as HTMLElement).style.setProperty('--mouse-x', `${x}px`);
+        (card as HTMLElement).style.setProperty('--mouse-y', `${y}px`);
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   return (
     <div className="app-container">
+      <div className="noise-overlay" />
+      <div className="ambient-glow-1" />
+      <div className="ambient-glow-2" />
+
       <header className="header-glass">
         <div className="header-content">
-          <div className="flex items-center gap-6">
-            <NavLink to="/" className="flex items-center gap-2 font-semibold text-sm" style={{ marginRight: '1rem', letterSpacing: '-0.01em' }}>
-              <div
-                className="flex justify-center items-center"
-                style={{
-                  width: '28px', height: '28px',
-                  borderRadius: '8px',
-                  backgroundColor: 'var(--accent)',
-                  boxShadow: '0 2px 8px var(--accent-muted)'
-                }}
+          <NavLink to="/" className="brand-logo">
+            <div
+              className="flex justify-center items-center"
+              style={{
+                width: '28px', height: '28px',
+                borderRadius: '8px',
+                backgroundColor: 'var(--accent)',
+                boxShadow: '0 2px 8px var(--accent-muted)'
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+            </div>
+            <span className="hide-mobile">TinyLog</span>
+          </NavLink>
+          <nav className="flex items-center gap-1">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                end={link.to === '/'}
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-              </div>
-              TinyLog
-            </NavLink>
-            <nav className="desktop-nav flex items-center gap-1">
-              {navLinks.map((link) => (
-                <NavLink
-                  key={link.to}
-                  to={link.to}
-                  end={link.to === '/'}
-                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                >
-                  {link.label}
-                </NavLink>
-              ))}
-            </nav>
-          </div>
-          <div className="flex items-center gap-3">
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+          <div className="flex items-center gap-2">
             <button
               onClick={toggleTheme}
               className="btn btn-ghost"
@@ -85,41 +101,8 @@ export default function Layout({ needsAuth }: { needsAuth: boolean }) {
                 Logout
               </button>
             )}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="btn btn-ghost mobile-menu-btn"
-              style={{ padding: '0.4rem' }}
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                {mobileMenuOpen ? (
-                  <>
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </>
-                ) : (
-                  <>
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <line x1="3" y1="12" x2="21" y2="12" />
-                    <line x1="3" y1="18" x2="21" y2="18" />
-                  </>
-                )}
-              </svg>
-            </button>
           </div>
         </div>
-        <nav className={`mobile-nav${mobileMenuOpen ? ' open' : ''}`}>
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.to === '/'}
-              onClick={() => setMobileMenuOpen(false)}
-              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-            >
-              {link.label}
-            </NavLink>
-          ))}
-        </nav>
       </header>
       <main className="main-content">
         <Outlet />

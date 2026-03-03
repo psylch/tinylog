@@ -114,7 +114,7 @@ export default function SessionsPage() {
             setPage(1);
           }}
           className="input-field"
-          style={{ width: 'auto', boxShadow: 'none' }}
+          style={{ flex: 1, minWidth: '140px', boxShadow: 'none' }}
         />
         <input
           type="date"
@@ -124,7 +124,7 @@ export default function SessionsPage() {
             setPage(1);
           }}
           className="input-field"
-          style={{ width: 'auto', boxShadow: 'none' }}
+          style={{ flex: 1, minWidth: '140px', boxShadow: 'none' }}
         />
       </div>
 
