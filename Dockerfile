@@ -21,6 +21,6 @@ RUN uv sync --no-dev
 # Copy built frontend into the path the app expects
 COPY --from=frontend /build/dist/ tinylog/frontend/
 
-EXPOSE 7890
+EXPOSE 7892
 
 CMD ["uv", "run", "tinylog", "serve", "--host", "0.0.0.0"]

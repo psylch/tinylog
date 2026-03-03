@@ -16,7 +16,7 @@ else:
 @dataclass
 class Config:
     host: str = "0.0.0.0"
-    port: int = 7890
+    port: int = 7892
     admin_key: str = ""
     source_type: str = "auto"
     db_path: str = ""

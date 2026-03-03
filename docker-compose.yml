@@ -2,7 +2,7 @@ services:
   tinylog:
     build: .
     ports:
-      - "7890:7890"
+      - "7892:7892"
     volumes:
       - ./agno_sessions.db:/data/agno_sessions.db:ro
     environment:

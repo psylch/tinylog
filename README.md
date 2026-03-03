@@ -59,10 +59,10 @@ tinylog serve --db ./adk_sessions.db --source-type google-adk
 # JSON Import
 tinylog serve --db ./conversations.json --source-type json
 
-# Open http://localhost:7890
+# Open http://localhost:7892
 ```
 
-API documentation is available at `http://localhost:7890/docs` (Swagger UI) when the server is running.
+API documentation is available at `http://localhost:7892/docs` (Swagger UI) when the server is running.
 
 ## Supported Data Sources
 
@@ -83,11 +83,11 @@ CLI flags, environment variables, or a `tinylog.toml` file:
 
 ```bash
 # CLI
-tinylog serve --db ./agno_sessions.db --port 7890 --admin-key mysecret --source-type agno
+tinylog serve --db ./agno_sessions.db --port 7892 --admin-key mysecret --source-type agno
 
 # Environment variables
 TINYLOG_DB=./agno_sessions.db
-TINYLOG_PORT=7890
+TINYLOG_PORT=7892
 TINYLOG_ADMIN_KEY=mysecret
 TINYLOG_DATA_DIR=./tinylog_data
 ```
@@ -95,7 +95,7 @@ TINYLOG_DATA_DIR=./tinylog_data
 ```toml
 # tinylog.toml
 [server]
-port = 7890
+port = 7892
 admin_key = ""
 
 [source]
@@ -115,7 +115,7 @@ services:
   tinylog:
     build: .
     ports:
-      - "7890:7890"
+      - "7892:7892"
     volumes:
       - ./agno_sessions.db:/data/agno_sessions.db:ro
     environment:
@@ -133,7 +133,7 @@ uv run tinylog serve --db /path/to/agno_sessions.db
 # Frontend
 cd frontend
 npm install
-npm run dev    # → http://localhost:5173 (proxies /api to :7890)
+npm run dev    # → http://localhost:5173 (proxies /api to :7892)
 npm run build  # → dist/ (copy to tinylog/frontend/ for packaging)
 ```
 

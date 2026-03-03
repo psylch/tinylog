@@ -1,8 +1,8 @@
 .PHONY: dev test lint build fmt clean docker help
 
 dev:  ## Start backend + frontend dev servers
-	@echo "Starting backend on :7890..."
-	uv run tinylog serve --port 7890 &
+	@echo "Starting backend on :7892..."
+	uv run tinylog serve --port 7892 &
 	@echo "Starting frontend..."
 	cd frontend && npm run dev
 

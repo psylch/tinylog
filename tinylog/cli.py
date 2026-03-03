@@ -18,7 +18,7 @@ def main():
     serve.add_argument("--db", type=str, default=None, help="Path to database file or session directory")
     serve.add_argument("--source-type", type=str, default=None,
                        help="Source type (agno, langchain, autogen, adk, claude-agent-sdk, json-import, auto). Default: auto-detect")
-    serve.add_argument("--port", type=int, default=None, help="Server port (default: 7890)")
+    serve.add_argument("--port", type=int, default=None, help="Server port (default: 7892)")
     serve.add_argument("--host", type=str, default=None, help="Server host (default: 0.0.0.0)")
     serve.add_argument("--admin-key", type=str, default=None, help="Admin API key")
     serve.add_argument("--data-dir", type=str, default=None, help="TinyLog data directory")
